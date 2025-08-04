@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Sphere, useTexture } from '@react-three/drei';
+import { OrbitControls, Sphere } from '@react-three/drei';
 import { useRef } from 'react';
 import { Mesh } from 'three';
 
@@ -35,6 +35,7 @@ function Globe({ onLocationSelect }: { onLocationSelect: (coords: { lat: number;
         metalness={0.1}
         transparent
         opacity={0.9}
+        wireframe={false}
       />
     </Sphere>
   );
