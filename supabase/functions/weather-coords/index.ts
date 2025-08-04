@@ -8,15 +8,13 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Try to get coordinates from request body first, then from URL params
     let lat, lon;
-    
+
     if (req.method === 'POST') {
       const body = await req.json();
       lat = body.lat?.toString();
@@ -36,9 +34,14 @@ serve(async (req) => {
 
     console.log(`Fetching weather for coordinates: ${lat}, ${lon}`);
 
-    const openWeatherKey = 'c831ded1c99baf06655a60a4f918f102';
-    
-    // Fetch current weather
+    const openWeatherKey = Deno.env.get('OPENWEATHERMAP_API_KEY');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+
+    if (!openWeatherKey || !supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Missing one or more required environment variables');
+    }
+
     const currentWeatherResponse = await fetch(
       `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${openWeatherKey}&units=metric`
     );
@@ -49,7 +52,6 @@ serve(async (req) => {
 
     const currentWeatherData = await currentWeatherResponse.json();
 
-    // Fetch 5-day forecast
     const forecastResponse = await fetch(
       `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${openWeatherKey}&units=metric`
     );
@@ -60,14 +62,13 @@ serve(async (req) => {
 
     const forecastData = await forecastResponse.json();
 
-    // Process current weather
     const currentWeather = {
       location: currentWeatherData.name || `${parseFloat(lat).toFixed(2)}, ${parseFloat(lon).toFixed(2)}`,
       temperature: currentWeatherData.main.temp,
       feelsLike: currentWeatherData.main.feels_like,
       description: currentWeatherData.weather[0].description,
       humidity: currentWeatherData.main.humidity,
-      windSpeed: (currentWeatherData.wind.speed * 3.6), // Convert m/s to km/h
+      windSpeed: (currentWeatherData.wind.speed * 3.6),
       icon: currentWeatherData.weather[0].icon,
       coordinates: {
         lat: parseFloat(lat),
@@ -75,13 +76,12 @@ serve(async (req) => {
       }
     };
 
-    // Process forecast (group by day, take midday data)
     const dailyForecasts = [];
     const processedDates = new Set();
-    
+
     for (const item of forecastData.list) {
       const date = new Date(item.dt * 1000).toDateString();
-      
+
       if (!processedDates.has(date) && dailyForecasts.length < 5) {
         processedDates.add(date);
         dailyForecasts.push({
@@ -96,12 +96,8 @@ serve(async (req) => {
       }
     }
 
-    // Save to recent locations (optional feature)
     try {
-      const supabase = createClient(
-        'https://iqnafwkhwyyjivrzowip.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxbmFmd2tod3l5aml2cnpvd2lwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMjc2MDEsImV4cCI6MjA2OTkwMzYwMX0.JCq5UgSgJYLHPs9eQbmIDVNOYL7mHk37Op9J2P8DK4E'
-      );
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
       await supabase.from('recent_locations').insert({
         city_name: currentWeather.location,
@@ -110,10 +106,7 @@ serve(async (req) => {
       });
     } catch (error) {
       console.log('Failed to save to recent locations:', error);
-      // Don't fail the request if we can't save to DB
     }
-
-    console.log('Weather data fetched successfully');
 
     return new Response(
       JSON.stringify({
