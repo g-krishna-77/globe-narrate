@@ -35,8 +35,9 @@ serve(async (req) => {
     console.log(`Fetching weather for coordinates: ${lat}, ${lon}`);
 
     const openWeatherKey = Deno.env.get('OPENWEATHERMAP_API_KEY');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    const supabaseUrl = Deno.env.get('NEXT_PUBLIC_SUPABASE_URL');
+    const supabaseAnonKey = Deno.env.get('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+
 
     if (!openWeatherKey || !supabaseUrl || !supabaseAnonKey) {
       throw new Error('Missing one or more required environment variables');
