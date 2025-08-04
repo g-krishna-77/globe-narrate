@@ -46,7 +46,14 @@ Forecast Summary:
 
 Your creative summary:`;
 
-    const openRouterKey = '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';
+    const openRouterKey = Deno.env.get('OPENROUTER_API_KEY');
+    
+    if (!openRouterKey) {
+      return new Response(
+        JSON.stringify({ error: 'OpenRouter API key not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
