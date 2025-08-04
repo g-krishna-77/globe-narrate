@@ -1,15 +1,19 @@
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Sphere } from '@react-three/drei';
-import { useRef, useState } from 'react';
+import { OrbitControls, Sphere, useTexture } from '@react-three/drei';
+import { useRef, useState, Suspense } from 'react';
 import { Mesh, Vector3 } from 'three';
 
 interface InteractiveGlobeProps {
   onLocationSelect: (coords: { lat: number; lon: number }) => void;
 }
 
-function Globe({ onLocationSelect }: { onLocationSelect: (coords: { lat: number; lon: number }) => void }) {
+function EarthGlobe({ onLocationSelect }: { onLocationSelect: (coords: { lat: number; lon: number }) => void }) {
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
+  
+  // Load Earth textures
+  const earthTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
+  const bumpTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-topology.png');
   
   const handleClick = (event: any) => {
     event.stopPropagation();
@@ -44,12 +48,41 @@ function Globe({ onLocationSelect }: { onLocationSelect: (coords: { lat: number;
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
     >
-      <meshStandardMaterial
-        color={hovered ? "#5ba3f5" : "#4a90e2"}
-        roughness={0.3}
-        metalness={0.1}
+      <meshPhongMaterial
+        map={earthTexture}
+        bumpMap={bumpTexture}
+        bumpScale={0.05}
+        shininess={100}
+        transparent={hovered}
+        opacity={hovered ? 0.9 : 1.0}
+      />
+    </Sphere>
+  );
+}
+
+function CloudLayer() {
+  const cloudTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-clouds.png');
+  
+  return (
+    <Sphere args={[2.01, 64, 64]}>
+      <meshPhongMaterial
+        map={cloudTexture}
         transparent={true}
-        opacity={0.9}
+        opacity={0.4}
+        depthWrite={false}
+      />
+    </Sphere>
+  );
+}
+
+function AtmosphereGlow() {
+  return (
+    <Sphere args={[2.1, 64, 64]}>
+      <meshBasicMaterial
+        color="#87CEEB"
+        transparent={true}
+        opacity={0.1}
+        side={2}
       />
     </Sphere>
   );
@@ -69,6 +102,20 @@ function Stars() {
   );
 }
 
+function LoadingFallback() {
+  return (
+    <Sphere args={[2, 32, 32]}>
+      <meshStandardMaterial
+        color="#4a90e2"
+        roughness={0.3}
+        metalness={0.1}
+        transparent={true}
+        opacity={0.9}
+      />
+    </Sphere>
+  );
+}
+
 export default function InteractiveGlobe({ onLocationSelect }: InteractiveGlobeProps) {
   return (
     <div className="relative w-full h-full rounded-2xl overflow-hidden globe-glow">
@@ -78,16 +125,21 @@ export default function InteractiveGlobe({ onLocationSelect }: InteractiveGlobeP
         gl={{ antialias: true, alpha: true }}
         dpr={[1, 2]}
       >
-        <ambientLight intensity={0.4} />
+        <ambientLight intensity={0.3} />
         <directionalLight
-          position={[5, 5, 5]}
-          intensity={1}
+          position={[5, 3, 5]}
+          intensity={1.2}
           castShadow={false}
         />
-        <pointLight position={[-5, -5, -5]} intensity={0.5} color="#4a90e2" />
+        <pointLight position={[-5, -5, -5]} intensity={0.3} color="#4a90e2" />
         
         <Stars />
-        <Globe onLocationSelect={onLocationSelect} />
+        
+        <Suspense fallback={<LoadingFallback />}>
+          <EarthGlobe onLocationSelect={onLocationSelect} />
+          <CloudLayer />
+          <AtmosphereGlow />
+        </Suspense>
         
         <OrbitControls
           enablePan={false}
@@ -104,7 +156,7 @@ export default function InteractiveGlobe({ onLocationSelect }: InteractiveGlobeP
       
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-4 left-4 text-primary-glow/80 text-sm font-medium">
-          Click anywhere on the globe to explore weather
+          Click anywhere on Earth to explore weather
         </div>
         <div className="absolute bottom-4 right-4 text-muted-foreground text-xs">
           Drag to rotate • Scroll to zoom
