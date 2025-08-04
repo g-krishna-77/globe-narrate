@@ -1,1 +1,10 @@
 project_id = "iqnafwkhwyyjivrzowip"
+
+[functions.weather-coords]
+verify_jwt = false
+
+[functions.ai-narrative]
+verify_jwt = false
+
+[functions.weather-city]
+verify_jwt = false

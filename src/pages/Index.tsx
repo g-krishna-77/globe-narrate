@@ -3,23 +3,72 @@ import { useWeatherStore } from '@/store/weatherStore';
 import InteractiveGlobe from '@/components/InteractiveGlobe';
 import WeatherDisplayPanel from '@/components/WeatherDisplayPanel';
 import LoadingSpinner from '@/components/LoadingSpinner';
-import { toast } from '@/components/ui/use-toast';
+import SearchBar from '@/components/SearchBar';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const Index = () => {
-  const { setSelectedLocation, setError } = useWeatherStore();
+  const { 
+    setSelectedLocation, 
+    setError, 
+    setLoading, 
+    setNarrativeLoading, 
+    setCurrentWeather, 
+    setForecast, 
+    setWeatherNarrative 
+  } = useWeatherStore();
 
   const handleLocationSelect = async (coords: { lat: number; lon: number }) => {
     setSelectedLocation(coords);
     setError(null);
-    
-    // For now, show a demo message since we need Supabase for API calls
-    toast({
-      title: "Location Selected",
-      description: `Latitude: ${coords.lat.toFixed(2)}, Longitude: ${coords.lon.toFixed(2)}`,
-    });
-    
-    // TODO: Connect to Supabase for real weather data
-    console.log('Selected coordinates:', coords);
+    setLoading(true);
+    setNarrativeLoading(true);
+
+    try {
+      console.log('Fetching weather for coordinates:', coords);
+
+      // Call weather-coords edge function
+      const { data, error } = await supabase.functions.invoke('weather-coords', {
+        body: { lat: coords.lat, lon: coords.lon },
+      });
+
+      if (error) throw error;
+
+      setCurrentWeather(data.currentWeather);
+      setForecast(data.forecast);
+
+      // Generate AI narrative
+      const { data: narrativeData, error: narrativeError } = await supabase.functions.invoke('ai-narrative', {
+        body: {
+          weatherData: data.currentWeather,
+          forecastData: data.forecast
+        }
+      });
+
+      if (narrativeError) {
+        console.error('Failed to generate narrative:', narrativeError);
+        setWeatherNarrative('Weather narrative temporarily unavailable.');
+      } else {
+        setWeatherNarrative(narrativeData.narrative);
+      }
+
+      toast({
+        title: "Weather Loaded",
+        description: `Showing weather for ${data.currentWeather.location}`,
+      });
+
+    } catch (error) {
+      console.error('Location selection error:', error);
+      setError('Failed to fetch weather data. Please try again.');
+      toast({
+        title: "Weather Error",
+        description: "Failed to fetch weather data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+      setNarrativeLoading(false);
+    }
   };
 
   return (
@@ -30,9 +79,10 @@ const Index = () => {
           <h1 className="text-4xl font-bold bg-gradient-sky bg-clip-text text-transparent">
             🌍 Global Weather Explorer
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-2 mb-6">
             Discover weather worldwide with AI-powered insights
           </p>
+          <SearchBar />
         </div>
       </header>
 
@@ -61,20 +111,6 @@ const Index = () => {
         </div>
       </main>
 
-      {/* Floating Connect Notice */}
-      <div className="fixed bottom-6 left-6 right-6 z-20">
-        <div className="max-w-md mx-auto weather-panel p-4 rounded-xl border border-primary/20">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-primary rounded-full pulse-glow"></div>
-            <div className="text-sm">
-              <div className="font-semibold text-foreground">Connect Supabase</div>
-              <div className="text-muted-foreground">
-                Enable real weather data & AI narratives
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

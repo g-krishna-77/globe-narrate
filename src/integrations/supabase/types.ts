@@ -14,7 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      recent_locations: {
+        Row: {
+          city_name: string
+          id: number
+          latitude: number
+          longitude: number
+          viewed_at: string
+        }
+        Insert: {
+          city_name: string
+          id?: number
+          latitude: number
+          longitude: number
+          viewed_at?: string
+        }
+        Update: {
+          city_name?: string
+          id?: number
+          latitude?: number
+          longitude?: number
+          viewed_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
