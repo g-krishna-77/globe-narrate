@@ -1,5 +1,6 @@
-import { Card } from '@/components/ui/card';
-import LoadingSpinner from './LoadingSpinner';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Sparkles } from 'lucide-react';
 
 interface WeatherNarrativeProps {
   narrative: string | null;
@@ -9,18 +10,20 @@ interface WeatherNarrativeProps {
 export default function WeatherNarrative({ narrative, loading }: WeatherNarrativeProps) {
   if (loading) {
     return (
-      <Card className="weather-panel p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <LoadingSpinner size="sm" />
-          <h3 className="text-lg font-semibold text-primary">
-            AI Weather Assistant
-          </h3>
-        </div>
-        <div className="space-y-2">
-          <div className="h-4 bg-muted/30 rounded animate-pulse"></div>
-          <div className="h-4 bg-muted/30 rounded animate-pulse w-4/5"></div>
-          <div className="h-4 bg-muted/30 rounded animate-pulse w-3/4"></div>
-        </div>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+            AI Weather Insights
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-4/5" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+        </CardContent>
       </Card>
     );
   }
@@ -30,13 +33,18 @@ export default function WeatherNarrative({ narrative, loading }: WeatherNarrativ
   }
 
   return (
-    <Card className="weather-panel p-6">
-      <h3 className="text-lg font-semibold text-primary mb-4">
-        🤖 AI Weather Assistant
-      </h3>
-      <p className="text-foreground leading-relaxed">
-        {narrative}
-      </p>
+    <Card className="w-full bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-primary">
+          <Sparkles className="h-5 w-5" />
+          AI Weather Insights
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground leading-relaxed">
+          {narrative}
+        </p>
+      </CardContent>
     </Card>
   );
 }
