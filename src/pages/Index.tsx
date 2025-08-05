@@ -74,12 +74,12 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="relative z-10 p-6">
+      <header className="relative z-10 p-4 lg:p-6">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold bg-gradient-sky bg-clip-text text-transparent">
+          <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-sky bg-clip-text text-transparent">
             🌍 Global Weather Explorer
           </h1>
-          <p className="text-muted-foreground mt-2 mb-6">
+          <p className="text-muted-foreground mt-2 mb-4 lg:mb-6 text-sm lg:text-base">
             Discover weather worldwide with AI-powered insights
           </p>
           <SearchBar />
@@ -87,10 +87,32 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="px-6 pb-6">
+      <main className="px-4 pb-4 lg:px-6 lg:pb-6">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-8 h-[calc(100vh-200px)]">
-            {/* Globe Section */}
+          {/* Mobile Layout - Stack vertically */}
+          <div className="lg:hidden space-y-6">
+            {/* Globe Section - Mobile */}
+            <div className="h-[60vh] min-h-[400px] relative">
+              <Suspense 
+                fallback={
+                  <div className="flex items-center justify-center h-full">
+                    <LoadingSpinner size="lg" />
+                  </div>
+                }
+              >
+                <InteractiveGlobe onLocationSelect={handleLocationSelect} />
+              </Suspense>
+            </div>
+
+            {/* Weather Display Section - Mobile */}
+            <div className="min-h-[40vh]">
+              <WeatherDisplayPanel />
+            </div>
+          </div>
+
+          {/* Desktop Layout - Side by side */}
+          <div className="hidden lg:grid lg:grid-cols-2 gap-8 h-[calc(100vh-200px)]">
+            {/* Globe Section - Desktop */}
             <div className="relative">
               <Suspense 
                 fallback={
@@ -103,14 +125,13 @@ const Index = () => {
               </Suspense>
             </div>
 
-            {/* Weather Display Section */}
+            {/* Weather Display Section - Desktop */}
             <div className="overflow-y-auto">
               <WeatherDisplayPanel />
             </div>
           </div>
         </div>
       </main>
-
     </div>
   );
 };

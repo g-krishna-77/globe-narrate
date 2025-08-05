@@ -75,14 +75,15 @@ export default function SearchBar() {
           placeholder="Search city or location..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 weather-panel border-primary/20"
+          className="pl-10 weather-panel border-primary/20 text-sm lg:text-base"
           disabled={isSearching}
         />
       </div>
       <Button 
         type="submit" 
         disabled={isSearching || !searchTerm.trim()}
-        className="shrink-0"
+        className="shrink-0 touch-friendly text-sm lg:text-base"
+        size="default"
       >
         {isSearching ? 'Searching...' : 'Search'}
       </Button>
