@@ -14,6 +14,7 @@ function EarthGlobe({ onLocationSelect }: { onLocationSelect: (coords: { lat: nu
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
   
+  // Define event handlers first
   const handleClick = (event: any) => {
     event.stopPropagation();
     
