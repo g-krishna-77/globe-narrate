@@ -11,9 +11,9 @@ function EarthGlobe({ onLocationSelect }: { onLocationSelect: (coords: { lat: nu
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
   
-  // Load Earth textures
-  const earthTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
-  const bumpTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-topology.png');
+  // Load Earth textures - using more reliable NASA Blue Marble imagery
+  const earthTexture = useTexture('https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73909/world.topo.bathy.200412.3x5400x2700.jpg');
+  const bumpTexture = useTexture('https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73934/world.topo.bathy.200412.3x5400x2700.jpg');
   
   const handleClick = (event: any) => {
     event.stopPropagation();
@@ -61,7 +61,7 @@ function EarthGlobe({ onLocationSelect }: { onLocationSelect: (coords: { lat: nu
 }
 
 function CloudLayer() {
-  const cloudTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-clouds.png');
+  const cloudTexture = useTexture('https://www.shadedrelief.com/natural3/images/cross_blended_hypso_shaded_relief.natural_earth_hypsometric_tints.raster.10800x5400.jpg');
   
   return (
     <Sphere args={[2.01, 64, 64]}>
