@@ -14,19 +14,6 @@ function EarthGlobe({ onLocationSelect }: { onLocationSelect: (coords: { lat: nu
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
   
-  // Using local high-quality Earth textures with error handling
-  const [textureError, setTextureError] = useState(false);
-  
-  let earthMap, normalMap, specularMap;
-  try {
-    earthMap = useTexture(earthTexture);
-    normalMap = useTexture(earthTexture);
-    specularMap = useTexture(earthTexture);
-  } catch (error) {
-    console.warn('Texture loading failed, using fallback', error);
-    setTextureError(true);
-  }
-  
   const handleClick = (event: any) => {
     event.stopPropagation();
     
@@ -51,22 +38,20 @@ function EarthGlobe({ onLocationSelect }: { onLocationSelect: (coords: { lat: nu
   const handlePointerOver = () => setHovered(true);
   const handlePointerOut = () => setHovered(false);
 
-  return (
-    <Sphere
-      ref={meshRef}
-      args={[2, 128, 128]}
-      onClick={handleClick}
-      onPointerOver={handlePointerOver}
-      onPointerOut={handlePointerOut}
-    >
-      {textureError ? (
-        <meshPhongMaterial
-          color="#4a90e2"
-          shininess={100}
-          transparent={hovered}
-          opacity={hovered ? 0.95 : 1.0}
-        />
-      ) : (
+  // Using local high-quality Earth textures with simple fallback
+  try {
+    const earthMap = useTexture(earthTexture);
+    const normalMap = useTexture(earthTexture);
+    const specularMap = useTexture(earthTexture);
+    
+    return (
+      <Sphere
+        ref={meshRef}
+        args={[2, 128, 128]}
+        onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+      >
         <meshPhongMaterial
           map={earthMap}
           normalMap={normalMap}
@@ -76,33 +61,47 @@ function EarthGlobe({ onLocationSelect }: { onLocationSelect: (coords: { lat: nu
           transparent={hovered}
           opacity={hovered ? 0.95 : 1.0}
         />
-      )}
-    </Sphere>
-  );
+      </Sphere>
+    );
+  } catch (error) {
+    console.warn('Texture loading failed, using fallback', error);
+    // Fallback to simple colored sphere
+    return (
+      <Sphere
+        ref={meshRef}
+        args={[2, 128, 128]}
+        onClick={handleClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+      >
+        <meshPhongMaterial
+          color="#4a90e2"
+          shininess={100}
+          transparent={hovered}
+          opacity={hovered ? 0.95 : 1.0}
+        />
+      </Sphere>
+    );
+  }
 }
 
 function CloudLayer() {
-  const [cloudError, setCloudError] = useState(false);
-  
-  let cloudTexture;
   try {
-    cloudTexture = useTexture(earthClouds);
+    const cloudTexture = useTexture(earthClouds);
+    return (
+      <Sphere args={[2.005, 64, 64]}>
+        <meshLambertMaterial
+          map={cloudTexture}
+          transparent={true}
+          opacity={0.3}
+          depthWrite={false}
+        />
+      </Sphere>
+    );
   } catch (error) {
     console.warn('Cloud texture loading failed', error);
-    setCloudError(true);
     return null; // Don't render clouds if texture fails
   }
-  
-  return (
-    <Sphere args={[2.005, 64, 64]}>
-      <meshLambertMaterial
-        map={cloudTexture}
-        transparent={true}
-        opacity={0.3}
-        depthWrite={false}
-      />
-    </Sphere>
-  );
 }
 
 function AtmosphereGlow() {
@@ -119,27 +118,22 @@ function AtmosphereGlow() {
 }
 
 function NightLights() {
-  const [nightError, setNightError] = useState(false);
-  
-  let nightTexture;
   try {
-    nightTexture = useTexture(earthNight);
+    const nightTexture = useTexture(earthNight);
+    return (
+      <Sphere args={[1.99, 128, 128]}>
+        <meshBasicMaterial
+          map={nightTexture}
+          transparent={true}
+          opacity={0.6}
+          blending={2} // AdditiveBlending
+        />
+      </Sphere>
+    );
   } catch (error) {
     console.warn('Night texture loading failed', error);
-    setNightError(true);
     return null; // Don't render night lights if texture fails
   }
-  
-  return (
-    <Sphere args={[1.99, 128, 128]}>
-      <meshBasicMaterial
-        map={nightTexture}
-        transparent={true}
-        opacity={0.6}
-        blending={2} // AdditiveBlending
-      />
-    </Sphere>
-  );
 }
 
 function StarField() {
