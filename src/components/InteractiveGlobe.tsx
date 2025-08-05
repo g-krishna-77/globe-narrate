@@ -11,10 +11,10 @@ function EarthGlobe({ onLocationSelect }: { onLocationSelect: (coords: { lat: nu
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
   
-  // High-quality Earth textures for Google Earth-like appearance
-  const earthTexture = useTexture('https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73909/world.topo.bathy.200412.3x5400x2700.jpg');
-  const normalTexture = useTexture('https://eoimages.gsfc.nasa.gov/images/imagerecords/73000/73934/world.topo.bathy.200412.3x5400x2700.jpg');
-  const specularTexture = useTexture('https://eoimages.gsfc.nasa.gov/images/imagerecords/74000/74518/world.topo.200407.3x5400x2700.jpg');
+  // High-quality Earth textures using reliable CDN sources
+  const earthTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
+  const normalTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-topology.png');
+  const specularTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-water.png');
   
   const handleClick = (event: any) => {
     event.stopPropagation();
@@ -62,7 +62,7 @@ function EarthGlobe({ onLocationSelect }: { onLocationSelect: (coords: { lat: nu
 }
 
 function CloudLayer() {
-  const cloudTexture = useTexture('https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57747/cloud_combined_2048.jpg');
+  const cloudTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-clouds.png');
   
   return (
     <Sphere args={[2.005, 64, 64]}>
@@ -90,7 +90,7 @@ function AtmosphereGlow() {
 }
 
 function NightLights() {
-  const nightTexture = useTexture('https://eoimages.gsfc.nasa.gov/images/imagerecords/55000/55167/earth_lights_lrg.jpg');
+  const nightTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-night.jpg');
   
   return (
     <Sphere args={[1.99, 128, 128]}>
