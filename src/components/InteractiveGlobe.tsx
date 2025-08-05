@@ -2,6 +2,9 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Sphere, useTexture, Stars, Preload } from '@react-three/drei';
 import { useRef, useState, Suspense, useEffect } from 'react';
 import { Mesh, Vector3, BackSide, Vector2 } from 'three';
+import earthTexture from '@/assets/earth-texture.jpg';
+import earthClouds from '@/assets/earth-clouds.jpg';
+import earthNight from '@/assets/earth-night.jpg';
 
 interface InteractiveGlobeProps {
   onLocationSelect: (coords: { lat: number; lon: number }) => void;
@@ -11,10 +14,18 @@ function EarthGlobe({ onLocationSelect }: { onLocationSelect: (coords: { lat: nu
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
   
-  // High-quality Earth textures using reliable CDN sources
-  const earthTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
-  const normalTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-topology.png');
-  const specularTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-water.png');
+  // Using local high-quality Earth textures with error handling
+  const [textureError, setTextureError] = useState(false);
+  
+  let earthMap, normalMap, specularMap;
+  try {
+    earthMap = useTexture(earthTexture);
+    normalMap = useTexture(earthTexture);
+    specularMap = useTexture(earthTexture);
+  } catch (error) {
+    console.warn('Texture loading failed, using fallback', error);
+    setTextureError(true);
+  }
   
   const handleClick = (event: any) => {
     event.stopPropagation();
@@ -48,21 +59,39 @@ function EarthGlobe({ onLocationSelect }: { onLocationSelect: (coords: { lat: nu
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
     >
-      <meshPhongMaterial
-        map={earthTexture}
-        normalMap={normalTexture}
-        specularMap={specularTexture}
-        normalScale={new Vector2(0.1, 0.1)}
-        shininess={200}
-        transparent={hovered}
-        opacity={hovered ? 0.95 : 1.0}
-      />
+      {textureError ? (
+        <meshPhongMaterial
+          color="#4a90e2"
+          shininess={100}
+          transparent={hovered}
+          opacity={hovered ? 0.95 : 1.0}
+        />
+      ) : (
+        <meshPhongMaterial
+          map={earthMap}
+          normalMap={normalMap}
+          specularMap={specularMap}
+          normalScale={new Vector2(0.1, 0.1)}
+          shininess={200}
+          transparent={hovered}
+          opacity={hovered ? 0.95 : 1.0}
+        />
+      )}
     </Sphere>
   );
 }
 
 function CloudLayer() {
-  const cloudTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-clouds.png');
+  const [cloudError, setCloudError] = useState(false);
+  
+  let cloudTexture;
+  try {
+    cloudTexture = useTexture(earthClouds);
+  } catch (error) {
+    console.warn('Cloud texture loading failed', error);
+    setCloudError(true);
+    return null; // Don't render clouds if texture fails
+  }
   
   return (
     <Sphere args={[2.005, 64, 64]}>
@@ -90,7 +119,16 @@ function AtmosphereGlow() {
 }
 
 function NightLights() {
-  const nightTexture = useTexture('https://unpkg.com/three-globe/example/img/earth-night.jpg');
+  const [nightError, setNightError] = useState(false);
+  
+  let nightTexture;
+  try {
+    nightTexture = useTexture(earthNight);
+  } catch (error) {
+    console.warn('Night texture loading failed', error);
+    setNightError(true);
+    return null; // Don't render night lights if texture fails
+  }
   
   return (
     <Sphere args={[1.99, 128, 128]}>
