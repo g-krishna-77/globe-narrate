@@ -2,8 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 // Supabase configuration - using Vite environment variables
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://iqnafwkhwyyjivrzowip.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const SUPABASE_URL = import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL) {
   throw new Error('VITE_SUPABASE_URL is required but not provided');
