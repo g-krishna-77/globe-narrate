@@ -225,17 +225,17 @@ export default function InteractiveGlobe({ onLocationSelect }: InteractiveGlobeP
       </Canvas>
       
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-2 left-2 lg:top-4 lg:left-4 text-primary-glow/80 text-xs lg:text-sm font-medium backdrop-blur-sm bg-black/20 px-2 py-1 lg:px-3 lg:py-1 rounded-lg">
+        <div className="absolute top-4 left-4 text-primary-glow/80 text-sm font-medium backdrop-blur-sm bg-black/20 px-3 py-1 rounded-lg">
           🌍 Click anywhere on Earth to explore weather
         </div>
-        <div className="absolute top-2 right-2 lg:top-4 lg:right-4 text-primary-glow/60 text-xs backdrop-blur-sm bg-black/20 px-2 py-1 rounded">
+        <div className="absolute top-4 right-4 text-primary-glow/60 text-xs backdrop-blur-sm bg-black/20 px-2 py-1 rounded">
           {isDay ? '☀️ Day' : '🌙 Night'}
         </div>
-        <div className="absolute bottom-2 right-2 lg:bottom-4 lg:right-4 text-muted-foreground/80 text-xs backdrop-blur-sm bg-black/20 px-2 py-1 rounded">
+        <div className="absolute bottom-4 right-4 text-muted-foreground/80 text-xs backdrop-blur-sm bg-black/20 px-2 py-1 rounded">
           Drag to rotate • Scroll to zoom
         </div>
-        <div className="absolute bottom-2 left-2 lg:bottom-4 lg:left-4 text-muted-foreground/60 text-xs backdrop-blur-sm bg-black/20 px-2 py-1 rounded">
-          High-resolution imagery
+        <div className="absolute bottom-4 left-4 text-muted-foreground/60 text-xs backdrop-blur-sm bg-black/20 px-2 py-1 rounded">
+          High-resolution NASA imagery
         </div>
       </div>
     </div>
